@@ -32,13 +32,20 @@ public class Ship {
     private float rotationSpeed = 100;
 
     // Which ways can the ship move
+    /*
     public final int STOPPED = 0;
     public final int LEFT = 1;
     public final int RIGHT = 2;
     public final int THRUSTING = 3;
+    */
+
+    public final int FORWARD = 0;
+    public final int LEFT = -1;
+    public final int RIGHT = 1;
 
     // Is the ship moving and in which direction
-    private int shipMoving = STOPPED;
+    private boolean shipThrusting = false;
+    private int shipDirection = FORWARD;
 
 
     /*This the the constructor method When we create an object from this class we will pass
@@ -92,10 +99,14 @@ public class Ship {
     }
 
     /*This method will be used to change/set if the ship is rotating left, right or thrusting*/
-    public void setMovementState(int state){
-        shipMoving = state;
+    /*
+    public void setMovementState(int state)
+    {
+            shipMoving = state;
     }
-
+    */
+    public void setThrust(boolean b){shipThrusting = b;}
+    public void setDirection(int state){shipDirection = state;}
 
 
     /*
@@ -114,7 +125,7 @@ public class Ship {
 
         float previousFA = facingAngle;
 
-        if(shipMoving == LEFT){
+        if(shipDirection == LEFT){
 
             facingAngle = facingAngle -rotationSpeed / fps;
 
@@ -123,7 +134,7 @@ public class Ship {
             }
         }
 
-        if(shipMoving == RIGHT){
+        if(shipDirection == RIGHT){
 
             facingAngle = facingAngle + rotationSpeed / fps;
 
@@ -132,7 +143,7 @@ public class Ship {
             }
         }
 
-        if(shipMoving == THRUSTING){
+        if(shipThrusting){
 
             /*
             facingAngle can be any angle between 1 and 360 degrees
@@ -165,8 +176,8 @@ public class Ship {
         facingAngle - previousFA
         */
 
-        float tempX = 0;
-        float tempY = 0;
+        float tempX;
+        float tempY;
 
         // rotate point a
         a.x = a.x - centre.x;
