@@ -8,7 +8,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.RectF;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -178,7 +177,6 @@ public class SpaceView extends SurfaceView implements Runnable
             horizonR.y = (int)(2*screenY/3 + screenX/2 * Math.tan(Math.toRadians(accelerationAngle)));
             horizonL.y = (int)(2*screenY/3 - screenX/2 * Math.tan(Math.toRadians(accelerationAngle)));
             paint.setColor(Color.argb(255,0,100,0));
-            RectF sup = new RectF(50,60,70,80);
 
             while(horizonL.y <= screenY || horizonR.y <= screenY )
             {
