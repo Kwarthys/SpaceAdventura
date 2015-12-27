@@ -29,7 +29,7 @@ public class Ship {
     private float verticalVelocity;
 
     /* How fast does the ship rotate? 100 degrees per second */
-    private float rotationSpeed = 100;
+    private float rotationSpeed = 50;
 
     // Which ways can the ship move
     /*
@@ -106,7 +106,9 @@ public class Ship {
     }
     */
     public void setThrust(boolean b){shipThrusting = b;}
-    public void setDirection(int state){shipDirection = state;}
+    public void setDirection(int state, int laSpeed){shipDirection = state; rotationSpeed = laSpeed;}
+    public boolean isThrusting(){return shipThrusting;}
+    public int getShipDirection(){return shipDirection;}
 
 
     /*

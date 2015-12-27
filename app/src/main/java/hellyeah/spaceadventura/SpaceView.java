@@ -7,6 +7,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.RectF;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -52,27 +54,34 @@ public class SpaceView extends SurfaceView implements Runnable
     // The players ship
     Ship ship;
 
+    private final double GRAVITY = 10;
+
     private final SensorManager sensorManager;
     private final Sensor capt;
-    private float accelerationX;
+    private int accelerationAngle;
     private float accelerationY;
 
     SensorEventListener leListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            accelerationX = event.values[0];
             accelerationY = event.values[1];
-            if(accelerationY > 3)
+            accelerationAngle = (int)(Math.toDegrees(Math.asin(-accelerationY/GRAVITY)));
+
+            if(accelerationAngle > 30)
+                accelerationAngle = 30;
+            else if(accelerationAngle < -30)
+                accelerationAngle = -30;
+            if(accelerationAngle > 5)
             {
-                ship.setDirection(ship.RIGHT);
+                ship.setDirection(ship.RIGHT, Math.abs(4*accelerationAngle)-20);
             }
-            else if(accelerationY < -3)
+            else if(accelerationAngle < -5)
             {
-                ship.setDirection(ship.LEFT);
+                ship.setDirection(ship.LEFT, Math.abs(4*accelerationAngle)-20);
             }
             else
             {
-                ship.setDirection(ship.FORWARD);
+                ship.setDirection(ship.FORWARD, 0);
             }
 
         }
@@ -160,32 +169,65 @@ public class SpaceView extends SurfaceView implements Runnable
             canvas = ourHolder.lockCanvas();
 
             // Draw the background color
-            canvas.drawColor(Color.argb(255, 255, 128, 128));
+            canvas.drawColor(Color.argb(255, 25, 0, 100));
+
+            Point horizonR = new Point();
+            Point horizonL = new Point();
+
+            horizonR.x = screenX; horizonL.x = 0;
+            horizonR.y = (int)(2*screenY/3 + screenX/2 * Math.tan(Math.toRadians(accelerationAngle)));
+            horizonL.y = (int)(2*screenY/3 - screenX/2 * Math.tan(Math.toRadians(accelerationAngle)));
+            paint.setColor(Color.argb(255,0,100,0));
+            RectF sup = new RectF(50,60,70,80);
+
+            while(horizonL.y <= screenY || horizonR.y <= screenY )
+            {
+                canvas.drawLine(horizonL.x, horizonL.y, horizonR.x, horizonR.y,paint);
+                horizonL.y++;
+                horizonR.y++;
+            }
+
 
             // Choose the brush color for drawing
-            paint.setColor(Color.argb(255,  255, 255, 255));
+            if(ship.isThrusting())
+                paint.setColor(Color.argb(255,  255, 0, 0));
+            else
+                paint.setColor(Color.argb(255,  255, 255, 255));
 
-            // Now draw the player spaceship
-            // Line from a to b
-            canvas.drawLine(ship.getA().x, ship.getA().y,
-                    ship.getB().x, ship.getB().y,
-                    paint);
-
-            // Line from b to c
+            // Line from b to c = Rear
             canvas.drawLine(ship.getB().x, ship.getB().y,
                     ship.getC().x, ship.getC().y,
                     paint);
 
-            // Line from c to a
+
+            // Line from a to b = LeftSide
+            if(ship.getShipDirection() == 1)
+                paint.setColor(Color.argb(255,  255, 0, 0));
+            else
+                paint.setColor(Color.argb(255,  255, 255, 255));
+            canvas.drawLine(ship.getA().x, ship.getA().y,
+                    ship.getB().x, ship.getB().y,
+                    paint);
+
+            // Line from c to a = RightSide
+            if(ship.getShipDirection() == -1)
+                paint.setColor(Color.argb(255,  255, 0, 0));
+            else
+                paint.setColor(Color.argb(255,  255, 255, 255));
             canvas.drawLine(ship.getC().x, ship.getC().y,
                     ship.getA().x, ship.getA().y,
                     paint);
 
-            canvas.drawPoint(ship.getCentre().x, ship.getCentre().y,paint);
 
-            paint.setTextSize(60);
-            canvas.drawText("facingAngle = "+ (int)ship.getFacingAngle()+ " degrees", 20, 70, paint);
-            canvas.drawText("Acceleration :" + accelerationY, 20, 140, paint);
+            paint.setColor(Color.argb(255,  100, 100, 100));
+            canvas.drawCircle(ship.getCentre().x, ship.getCentre().y, 10, paint);
+
+            int textSize = 30;
+
+            paint.setTextSize(textSize);
+            canvas.drawText("facingAngle = "+ (int)ship.getFacingAngle()+ " degrees", 20, textSize, paint);
+            canvas.drawText("Acceleration :" + accelerationY, 20, textSize*2, paint);
+            canvas.drawText("Inclinaison :" + accelerationAngle + " = arcsin(" + (int)accelerationY + "/" + GRAVITY +")", 20, textSize*3, paint);
 
             // Draw everything to the screen
             ourHolder.unlockCanvasAndPost(canvas);
@@ -248,12 +290,8 @@ public class SpaceView extends SurfaceView implements Runnable
                     }
 
                 }*/
-
-                if(motionEvent.getY() < screenY - screenY / 8) {
-                    // Thrust
-                    ship.setThrust(true);
-
-                }
+                // Thrust
+                ship.setThrust(true);
 
                 break;
 
