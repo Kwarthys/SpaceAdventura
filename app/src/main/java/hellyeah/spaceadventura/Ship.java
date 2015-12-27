@@ -8,17 +8,14 @@ import android.graphics.PointF;
 
 public class Ship {
 
-    PointF a;
-    PointF b;
-    PointF c;
+    PointF topRight;
+    PointF topLeft;
+    PointF botRight;
+    PointF botLeft;
     PointF centre;
 
     /* Which way is the ship facing Straight up to start with */
     float facingAngle = 270;
-
-    // How long will our spaceship be
-    private float length;
-    private float width;
 
     // This will hold the pixels per second speed that the ship can move at
     private float speed = 100;
@@ -52,25 +49,29 @@ public class Ship {
     in the screen width and height*/
     public Ship(Context context, int screenX, int screenY)
     {
-        length = screenX / 5;
-        width = screenY / 5;
+        float length = screenY / 5;
+        float width = screenX / 5;
 
-        a = new PointF();
-        b = new PointF();
-        c = new PointF();
+        topRight = new PointF();
+        topLeft = new PointF();
+        botLeft = new PointF();
+        botRight = new PointF();
         centre = new PointF();
 
         centre.x = screenX / 2;
         centre.y = screenY / 2;
 
-        a.x = centre.x;
-        a.y = centre.y - length / 2;
+        topLeft.x = centre.x - width/2;
+        topLeft.y = centre.y - length/2;
 
-        b.x = centre.x - width / 2;
-        b.y = centre.y + length / 2;
+        topRight.x = centre.x + width / 2;
+        topRight.y = centre.y - length / 2;
 
-        c.x = centre.x + width / 2;
-        c.y = centre.y + length / 2;
+        botLeft.x = centre.x - width / 2;
+        botLeft.y = centre.y + length / 2;
+
+        botRight.x = centre.x + width / 2;
+        botRight.y = centre.y + length / 2;
 
     }
 
@@ -79,19 +80,24 @@ public class Ship {
         return  centre;
     }
 
-    public PointF getA()
+    public PointF getTopRight()
     {
-        return  a;
+        return  topRight;
     }
 
-    public PointF getB()
+    public PointF getTopLeft()
     {
-        return  b;
+        return  topLeft;
     }
 
-    public PointF getC()
+    public PointF getBotRight()
     {
-        return  c;
+        return  botRight;
+    }
+
+    public PointF getBotLeft()
+    {
+        return  botLeft;
     }
 
     float getFacingAngle(){
@@ -127,7 +133,7 @@ public class Ship {
 
         float previousFA = facingAngle;
 
-        if(shipDirection == LEFT){
+        if(shipDirection == RIGHT){
 
             facingAngle = facingAngle -rotationSpeed / fps;
 
@@ -136,7 +142,7 @@ public class Ship {
             }
         }
 
-        if(shipDirection == RIGHT){
+        if(shipDirection == LEFT){
 
             facingAngle = facingAngle + rotationSpeed / fps;
 
@@ -161,14 +167,13 @@ public class Ship {
             centre.x = centre.x + horizontalVelocity * speed / fps;
             centre.y = centre.y + verticalVelocity * speed / fps;
 
-            a.x = a.x + horizontalVelocity * speed / fps;
-            a.y = a.y + verticalVelocity * speed / fps;
+            float dx = horizontalVelocity * speed / fps;
+            float dy = verticalVelocity * speed / fps;
 
-            b.x = b.x + horizontalVelocity * speed / fps;
-            b.y = b.y + verticalVelocity * speed / fps;
-
-            c.x = c.x + horizontalVelocity * speed / fps;
-            c.y = c.y + verticalVelocity * speed / fps;
+            topRight.x += dx;topRight.y += dy;
+            topLeft.x += dx; topLeft.y += dy;
+            botLeft.x += dx; botLeft.y += dy;
+            botRight.x += dx; botRight.y += dy;
 
         }
 
@@ -178,49 +183,29 @@ public class Ship {
         facingAngle - previousFA
         */
 
-        float tempX;
-        float tempY;
+        float dangle = facingAngle - previousFA;
 
-        // rotate point a
-        a.x = a.x - centre.x;
-        a.y = a.y - centre.y;
+        rotate(topLeft, dangle);
+        rotate(topRight, dangle);
+        rotate(botLeft, dangle);
+        rotate(botRight, dangle);
 
-        tempX = (float)(a.x * Math.cos(Math.toRadians(facingAngle - previousFA)) -
-                a.y * Math.sin(Math.toRadians(facingAngle - previousFA)));
+    }// End of update method
 
-        tempY = (float)(a.x * Math.sin(Math.toRadians(facingAngle - previousFA)) +
-                a.y * Math.cos(Math.toRadians(facingAngle - previousFA)));
-
-        a.x = tempX + centre.x;
-        a.y = tempY + centre.y;
-
-        // rotate point b
-        b.x = b.x - centre.x;
-        b.y = b.y - centre.y;
-
-        tempX = (float)(b.x * Math.cos(Math.toRadians(facingAngle - previousFA)) -
-                b.y * Math.sin(Math.toRadians(facingAngle - previousFA)));
-
-        tempY = (float)(b.x * Math.sin(Math.toRadians(facingAngle - previousFA)) +
-                b.y * Math.cos(Math.toRadians(facingAngle - previousFA)));
-
-        b.x = tempX + centre.x;
-        b.y = tempY + centre.y;
-
-        // rotate point c
+    private void rotate(PointF c, float dteta)
+    {
         c.x = c.x - centre.x;
         c.y = c.y - centre.y;
 
-        tempX = (float)(c.x * Math.cos(Math.toRadians(facingAngle - previousFA)) -
-                c.y * Math.sin(Math.toRadians(facingAngle - previousFA)));
+        float tempX = (float)(c.x * Math.cos(Math.toRadians(dteta)) -
+                c.y * Math.sin(Math.toRadians(dteta)));
 
-        tempY = (float)(c.x * Math.sin(Math.toRadians(facingAngle - previousFA)) +
-                c.y * Math.cos(Math.toRadians(facingAngle - previousFA)));
+        float tempY = (float)(c.x * Math.sin(Math.toRadians(dteta)) +
+                c.y * Math.cos(Math.toRadians(dteta)));
 
         c.x = tempX + centre.x;
         c.y = tempY + centre.y;
-
-    }// End of update method
+    }
 
 
 

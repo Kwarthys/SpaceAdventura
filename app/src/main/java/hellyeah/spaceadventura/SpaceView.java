@@ -186,11 +186,32 @@ public class SpaceView extends SurfaceView implements Runnable
             }
 
 
+            /********************************DESSIN DU VAISSEAU********************************/
+
+            //deux diagonales
+            paint.setColor(Color.argb(255,  100, 100, 100));
+            canvas.drawLine(ship.getTopLeft().x, ship.getTopLeft().y, ship.getBotRight().x , ship.getBotRight().y , paint);
+            canvas.drawLine(ship.getTopRight().x, ship.getTopRight().y, ship.getBotLeft().x , ship.getBotLeft().y , paint);
+
+            //cercles au bout des ailes
+            int radiusAiles = 10;
+            canvas.drawCircle(ship.getBotLeft().x, ship.getBotLeft().y, radiusAiles, paint);
+            canvas.drawCircle(ship.getTopLeft().x, ship.getTopLeft().y, radiusAiles, paint);
+            canvas.drawCircle(ship.getTopRight().x, ship.getTopRight().y, radiusAiles, paint);
+            canvas.drawCircle(ship.getBotRight().x, ship.getBotRight().y, radiusAiles, paint);
+
+            //cercle du cockpit
+            int radiusCockpit = 20;
+            canvas.drawCircle(ship.getCentre().x, ship.getCentre().y, radiusCockpit, paint);
+
+            /*
+
             // Choose the brush color for drawing
             if(ship.isThrusting())
                 paint.setColor(Color.argb(255,  255, 0, 0));
             else
                 paint.setColor(Color.argb(255,  255, 255, 255));
+
 
             // Line from b to c = Rear
             canvas.drawLine(ship.getB().x, ship.getB().y,
@@ -218,7 +239,9 @@ public class SpaceView extends SurfaceView implements Runnable
 
 
             paint.setColor(Color.argb(255,  100, 100, 100));
-            canvas.drawCircle(ship.getCentre().x, ship.getCentre().y, 10, paint);
+            canvas.drawCircle(ship.getCentre().x, ship.getCentre().y, 20, paint);
+
+            */
 
             int textSize = 30;
 
