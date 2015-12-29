@@ -63,24 +63,26 @@ public class SpaceView extends SurfaceView implements Runnable
     SensorEventListener leListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
+
+            int rotateMax = 50;
             accelerationY = event.values[1];
             accelerationAngle = (int)(Math.toDegrees(Math.asin(-accelerationY/GRAVITY)));
 
-            if(accelerationAngle > 30)
-                accelerationAngle = 30;
-            else if(accelerationAngle < -30)
-                accelerationAngle = -30;
-            if(accelerationAngle > 5)
+            if(accelerationAngle > rotateMax)
+                accelerationAngle = rotateMax;
+            else if(accelerationAngle < -rotateMax)
+                accelerationAngle = -rotateMax;
+            if(accelerationAngle > 3)
             {
-                ship.setDirection(ship.RIGHT, Math.abs(4*accelerationAngle)-20);
+                ship.setDirection(accelerationAngle - 3);
             }
-            else if(accelerationAngle < -5)
+            else if(accelerationAngle < -3)
             {
-                ship.setDirection(ship.LEFT, Math.abs(4*accelerationAngle)-20);
+                ship.setDirection(accelerationAngle + 3);
             }
             else
             {
-                ship.setDirection(ship.FORWARD, 0);
+                ship.setDirection((float)0);
             }
 
         }

@@ -5,8 +5,11 @@ package hellyeah.spaceadventura;
  */
 import android.content.Context;
 import android.graphics.PointF;
+import android.util.Log;
 
-public class Ship {
+public class Ship
+{
+    private final String TAG = "Ship";
 
     PointF topRight;
     PointF topLeft;
@@ -16,9 +19,10 @@ public class Ship {
 
     /* Which way is the ship facing Straight up to start with */
     float facingAngle = 270;
+    private float aimingAngle;
 
     // This will hold the pixels per second speed that the ship can move at
-    private float speed = 100;
+    private float speed = 1;
 
     /* These next two variables control the actual movement rate per frame
     their values are set each frame based on speed and heading */
@@ -26,7 +30,7 @@ public class Ship {
     private float verticalVelocity;
 
     /* How fast does the ship rotate? 100 degrees per second */
-    private float rotationSpeed = 50;
+    private float rotationSpeed = 100;
 
     // Which ways can the ship move
     /*
@@ -51,6 +55,8 @@ public class Ship {
     {
         float length = screenY / 5;
         float width = screenX / 5;
+
+        aimingAngle = 0;
 
         topRight = new PointF();
         topLeft = new PointF();
@@ -113,6 +119,15 @@ public class Ship {
     */
     public void setThrust(boolean b){shipThrusting = b;}
     public void setDirection(int state, int laSpeed){shipDirection = state; rotationSpeed = laSpeed;}
+    public void setDirection(float angle)
+    {
+        aimingAngle = angle;
+        if(aimingAngle < -30)
+            aimingAngle = -30;
+        else if(aimingAngle > 30)
+            aimingAngle = 30;
+        //Log.d(TAG, "aimingAngle : " + aimingAngle);
+    }
     public boolean isThrusting(){return shipThrusting;}
     public int getShipDirection(){return shipDirection;}
 
@@ -133,6 +148,22 @@ public class Ship {
 
         float previousFA = facingAngle;
 
+        float relativeAngle = 270 - facingAngle;
+
+        if(Math.pow(relativeAngle - aimingAngle, 2) < 4)
+            setDirection(FORWARD, 0);
+        else if(aimingAngle < relativeAngle)
+        {
+            setDirection(LEFT, (int)Math.pow(relativeAngle-aimingAngle-1,2));
+        }
+        else if(aimingAngle > relativeAngle)
+        {
+            setDirection(RIGHT, (int)Math.pow(relativeAngle-aimingAngle-1,2));
+        }
+        //Log.d(TAG, "aimingAngle : " + aimingAngle);
+        //Log.d(TAG, "relativeAngle/FA : " + relativeAngle + '/' + facingAngle);
+
+        /*
         if(shipDirection == RIGHT){
 
             facingAngle = facingAngle -rotationSpeed / fps;
@@ -149,47 +180,71 @@ public class Ship {
             if(facingAngle > 360){
                 facingAngle = 1;
             }
+        }*/
+
+        /******************SURCOUCHE VIRAGE******************/
+        if(shipDirection == RIGHT){
+
+            facingAngle = facingAngle -rotationSpeed / fps;
+
+            if(facingAngle < 240){
+                facingAngle = 240;
+            }
         }
 
-        if(shipThrusting){
+        if(shipDirection == LEFT){
 
-            /*
-            facingAngle can be any angle between 1 and 360 degrees
-            the Math.toRadians method simply converts the more conventional
-            degree measurements to radians which are required by
-            the cos and sin methods.
-            */
+            facingAngle = facingAngle + rotationSpeed / fps;
 
-            horizontalVelocity = (float)(Math.cos(Math.toRadians(facingAngle)));
-            verticalVelocity = (float)(Math.sin(Math.toRadians(facingAngle)));
-
-            // move the ship - 1 point at a time
-            centre.x = centre.x + horizontalVelocity * speed / fps;
-            centre.y = centre.y + verticalVelocity * speed / fps;
-
-            float dx = horizontalVelocity * speed / fps;
-            float dy = verticalVelocity * speed / fps;
-
-            topRight.x += dx;topRight.y += dy;
-            topLeft.x += dx; topLeft.y += dy;
-            botLeft.x += dx; botLeft.y += dy;
-            botRight.x += dx; botRight.y += dy;
-
+            if(facingAngle > 300){
+                facingAngle = 300;
+            }
         }
+
+        if(Math.abs(facingAngle - 270 - 3) < 3)
+            facingAngle = 270;
+        /****************************************************/
+
 
         /*
+        facingAngle can be any angle between 1 and 360 degrees
+        the Math.toRadians method simply converts the more conventional
+        degree measurements to radians which are required by
+        the cos and sin methods.
+        */
+        //horizontalVelocity = (float)(Math.cos(Math.toRadians(facingAngle)));
+        //verticalVelocity = (float)(Math.sin(Math.toRadians(facingAngle)));
+
+        horizontalVelocity = - Math.signum(relativeAngle) * ((float)Math.pow(relativeAngle,2));
+        verticalVelocity = (float)0;
+
+        // move the ship - 1 point at a time
+
+        float dx = horizontalVelocity * speed / fps;
+        float dy = verticalVelocity * speed / fps;
+
+        centre.x = centre.x + dx;
+        centre.y = centre.y + dy;
+
+
+        topRight.x += dx;topRight.y += dy;
+        topLeft.x += dx; topLeft.y += dy;
+        botLeft.x += dx; botLeft.y += dy;
+        botRight.x += dx; botRight.y += dy;
+
+
+
+         /*
         Now rotate each of the three points by
         the change in rotation this frame
         facingAngle - previousFA
         */
-
         float dangle = facingAngle - previousFA;
 
         rotate(topLeft, dangle);
         rotate(topRight, dangle);
         rotate(botLeft, dangle);
         rotate(botRight, dangle);
-
     }// End of update method
 
     private void rotate(PointF c, float dteta)
